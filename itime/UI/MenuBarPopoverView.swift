@@ -6,14 +6,13 @@ struct MenuBarPopoverView: View {
     @Environment(ConversionHistory.self) private var history
     @State private var inputText: String = ""
     @State private var currentResult: ConversionResult?
-    @State private var showSettings = false
     @AppStorage("outputMilliseconds") private var outputMilliseconds = false
 
     var body: some View {
         VStack(spacing: 0) {
-            if showSettings {
+            if AppState.shared.showSettings {
                 SettingsView {
-                    showSettings = false
+                    AppState.shared.showSettings = false
                 }
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
             } else {
@@ -22,7 +21,7 @@ struct MenuBarPopoverView: View {
             }
         }
         .background(.regularMaterial)
-        .animation(.easeInOut(duration: 0.2), value: showSettings)
+        .animation(.easeInOut(duration: 0.2), value: AppState.shared.showSettings)
     }
 
     private var mainContent: some View {
@@ -74,7 +73,7 @@ struct MenuBarPopoverView: View {
     private var bottomToolbar: some View {
         HStack {
             Button {
-                showSettings = true
+                AppState.shared.showSettings = true
             } label: {
                 Image(systemName: "gearshape")
                     .font(.system(size: 13))

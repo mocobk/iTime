@@ -22,6 +22,11 @@ final class ConversionHistory {
     }
 
     func add(_ result: ConversionResult) {
+        // Dedup: remove any existing entry with the same input+output,
+        // so the newest one (with updated createdAt) replaces it
+        entries.removeAll { entry in
+            entry.input == result.input && entry.output == result.output && entry.direction == result.direction
+        }
         entries.insert(result, at: 0)
         if entries.count > Self.maxEntries {
             entries = Array(entries.prefix(Self.maxEntries))

@@ -68,7 +68,6 @@ struct HistoryRowView: View {
     var body: some View {
         Button {
             ClipboardService.shared.writeText(entry.output)
-            ToastService.shared.show(input: entry.input, output: entry.output)
             withAnimation { copied = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 withAnimation { copied = false }

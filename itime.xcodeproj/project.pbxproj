@@ -15,6 +15,7 @@
 		B3EB07E80C8D6B2FBDDFEB00 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2888F87FE953422F9B1C5AED /* ToastView.swift */;};
 		ACF090B4624684B3236D198C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4923EC58B4F294A4E2C4B638 /* AppDelegate.swift */;};
 		79A2DD835812BBA0BF79A365 /* itimeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44447D3B0B235867BFFA27B9 /* itimeApp.swift */;};
+		63B385501CE3BD21EDB082DC /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4F54A1E9F901EC917B2541A /* AppState.swift */;};
 		270095696DD6FAE76305D19B /* ConversionHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BBAB1E1914EA2BDB736D845 /* ConversionHistory.swift */;};
 		F083A65E8A5A684FA7BB0257 /* ConversionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3EFA6394339BB12868DD88 /* ConversionResult.swift */;};
 		25BDA841ED3812B67185DBC9 /* HotkeyConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B71DBA29EE3B101F4E4B1780 /* HotkeyConfig.swift */;};
@@ -46,6 +47,7 @@
 		2888F87FE953422F9B1C5AED /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>";};
 		4923EC58B4F294A4E2C4B638 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>";};
 		44447D3B0B235867BFFA27B9 /* itimeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = itimeApp.swift; sourceTree = "<group>";};
+		A4F54A1E9F901EC917B2541A /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>";};
 		2BBAB1E1914EA2BDB736D845 /* ConversionHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionHistory.swift; sourceTree = "<group>";};
 		DA3EFA6394339BB12868DD88 /* ConversionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionResult.swift; sourceTree = "<group>";};
 		B71DBA29EE3B101F4E4B1780 /* HotkeyConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyConfig.swift; sourceTree = "<group>";};
@@ -133,6 +135,7 @@
 		F6F4AAA2CD3DE55933EB36F1 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A4F54A1E9F901EC917B2541A /* AppState.swift */,
 				2BBAB1E1914EA2BDB736D845 /* ConversionHistory.swift */,
 				DA3EFA6394339BB12868DD88 /* ConversionResult.swift */,
 				B71DBA29EE3B101F4E4B1780 /* HotkeyConfig.swift */,
@@ -291,6 +294,7 @@
 				759DBC2D9241B5527F4B3A9A /* DateParser.swift in Sources */,
 				C19E9DC1C1357D0B8067C4F2 /* OutputFormatter.swift in Sources */,
 				35142DD3F8CDD4584CF39099 /* TimestampDetector.swift in Sources */,
+				63B385501CE3BD21EDB082DC /* AppState.swift in Sources */,
 				270095696DD6FAE76305D19B /* ConversionHistory.swift in Sources */,
 				F083A65E8A5A684FA7BB0257 /* ConversionResult.swift in Sources */,
 				25BDA841ED3812B67185DBC9 /* HotkeyConfig.swift in Sources */,
@@ -478,7 +482,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.itime.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -503,7 +507,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.itime.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

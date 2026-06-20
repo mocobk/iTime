@@ -20,36 +20,27 @@ struct ToastView: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 12))
+                .font(.system(size: 22))
                 .foregroundStyle(.secondary)
 
             if isMessageOnly {
                 Text(output)
-                    .font(.callout)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+                    .font(.system(size: 28, weight: .medium))
+                    .foregroundStyle(.primary)
             } else {
-                Text("\(truncatedInput) → \(output)")
-                    .font(.callout)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+                Text("\(input ?? "") → \(output)")
+                    .font(.system(size: 28, weight: .medium))
+                    .foregroundStyle(.primary)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-        .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        // Original background style (.ultraThinMaterial) inside rounded rect;
+        // outside the rounded rect the window is fully transparent
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(isMessageOnly ? output : "\(input ?? "") 转换为 \(output)")
-    }
-
-    private var truncatedInput: String {
-        guard let input else { return "" }
-        if input.count > 20 {
-            return String(input.prefix(17)) + "..."
-        }
-        return input
     }
 }

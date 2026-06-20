@@ -141,6 +141,21 @@ final class ConversionEngineTests: XCTestCase {
         XCTAssertEqual(result!.direction, .dateToTimestamp)
     }
 
+    func testExtractsDateWithTrailingChars() {
+        // "2025-06-20 09:00:01其余字符" → extracts "2025-06-20 09:00:01"
+        let result = ConversionEngine.convert("2025-06-20 09:00:01其余字符")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "2025-06-20 09:00:01")
+        XCTAssertEqual(result!.direction, .dateToTimestamp)
+    }
+
+    func testExtractsDateWithTimeSuffix() {
+        // "2025-06-20 09:00:01时间" → extracts "2025-06-20 09:00:01"
+        let result = ConversionEngine.convert("2025-06-20 09:00:01时间")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "2025-06-20 09:00:01")
+    }
+
     func testPureTimestampNotModified() {
         // Pure timestamp should not be modified
         let result = ConversionEngine.convert("1704067200")

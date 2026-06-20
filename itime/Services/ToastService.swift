@@ -24,25 +24,29 @@ final class ToastService {
         let toastView = ToastView(input: input, output: output)
         let hostingView = NSHostingView(rootView: toastView)
 
+        // Ensure hosting view background is transparent
+        hostingView.wantsLayer = true
+        hostingView.layer?.backgroundColor = .clear
+
         // Measure the content
         let fittingSize = hostingView.fittingSize
-        let width = max(280, min(400, fittingSize.width + 8))
-        let height = fittingSize.height + 4
+        let width = max(320, fittingSize.width + 24)
+        let height = fittingSize.height + 12
 
         window.setContentSize(NSSize(width: width, height: height))
         window.contentView = hostingView
 
-        // Position: centered horizontally, near top of screen
+        // Position: centered on screen
         guard let screen = NSScreen.main else { return }
         let screenFrame = screen.visibleFrame
         let x = screenFrame.midX - width / 2
-        let y = screenFrame.maxY - 70 - height
+        let y = screenFrame.midY - height / 2
         window.setFrameOrigin(NSPoint(x: x, y: y))
 
         window.orderFront(nil)
         window.alphaValue = 0
 
-        // Fade in (< 300ms per design spec)
+        // Fade in
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = 0.15
             window.animator().alphaValue = 1.0
@@ -72,19 +76,23 @@ final class ToastService {
         let toastView = ToastView(message: message)
         let hostingView = NSHostingView(rootView: toastView)
 
+        // Ensure hosting view background is transparent
+        hostingView.wantsLayer = true
+        hostingView.layer?.backgroundColor = .clear
+
         // Measure the content
         let fittingSize = hostingView.fittingSize
-        let width = max(280, min(400, fittingSize.width + 8))
-        let height = fittingSize.height + 4
+        let width = max(320, fittingSize.width + 24)
+        let height = fittingSize.height + 12
 
         window.setContentSize(NSSize(width: width, height: height))
         window.contentView = hostingView
 
-        // Position: centered horizontally, near top of screen
+        // Position: centered on screen
         guard let screen = NSScreen.main else { return }
         let screenFrame = screen.visibleFrame
         let x = screenFrame.midX - width / 2
-        let y = screenFrame.maxY - 70 - height
+        let y = screenFrame.midY - height / 2
         window.setFrameOrigin(NSPoint(x: x, y: y))
 
         window.orderFront(nil)
@@ -137,7 +145,7 @@ private final class ToastWindow: NSPanel {
         self.level = .floating
         self.isOpaque = false
         self.backgroundColor = .clear
-        self.hasShadow = true
+        self.hasShadow = false
         self.collectionBehavior = [.canJoinAllSpaces, .stationary]
         self.isMovableByWindowBackground = false
         self.hidesOnDeactivate = false

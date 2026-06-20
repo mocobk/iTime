@@ -5,7 +5,8 @@ enum ConversionEngine {
 
     /// Convert a raw input string to a ConversionResult.
     /// Tries timestamp detection first (unambiguous), then date string parsing.
-    /// Automatically extracts time-related substrings from mixed content.
+    /// Automatically extracts time-related substrings from mixed content,
+    /// so the ConversionResult `input` field only contains time-related characters.
     /// Returns nil if the input cannot be recognized.
     static func convert(
         _ rawInput: String,
@@ -14,18 +15,14 @@ enum ConversionEngine {
         let input = rawInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !input.isEmpty else { return nil }
 
-        // Try the whole input first
-        if let result = tryConvert(input, originalInput: input, outputPrecision: outputPrecision) {
+        // Try extracting time substring first (strips extraneous characters like "时间", "秒", etc.)
+        let extracted = extractTimeSubstring(input)
+        if let extracted, let result = tryConvert(extracted, outputPrecision: outputPrecision) {
             return result
         }
 
-        // If the whole input doesn't match, try extracting time substrings
-        let extracted = extractTimeSubstring(input)
-        if let extracted, extracted != input {
-            return tryConvert(extracted, originalInput: input, outputPrecision: outputPrecision)
-        }
-
-        return nil
+        // Fall back to trying the whole input (for cases where extraction fails but whole input matches)
+        return tryConvert(input, outputPrecision: outputPrecision)
     }
 
     /// Classify the input without performing conversion.
@@ -33,29 +30,26 @@ enum ConversionEngine {
         let input = rawInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !input.isEmpty else { return .unrecognized }
 
-        // Try the whole input first
-        let wholeClassification = classifySingle(input)
-        if wholeClassification != .unrecognized {
-            return wholeClassification
-        }
-
-        // Try extracting time substrings
+        // Try extracting time substring first
         let extracted = extractTimeSubstring(input)
         if let extracted {
-            return classifySingle(extracted)
+            let classification = classifySingle(extracted)
+            if classification != .unrecognized {
+                return classification
+            }
         }
 
-        return .unrecognized
+        // Fall back to classifying the whole input
+        return classifySingle(input)
     }
 
     // MARK: - Private
 
-    /// Try to convert a single (possibly extracted) time string.
-    /// The `input` in ConversionResult is set to the extracted/filtered time string,
+    /// Try to convert a single time string.
+    /// The `input` in ConversionResult is set to this string,
     /// so only time-related characters are displayed.
     private static func tryConvert(
         _ timeString: String,
-        originalInput: String,
         outputPrecision: OutputPrecision
     ) -> ConversionResult? {
         // Try timestamp first (pure digits are unambiguous)
@@ -70,8 +64,8 @@ enum ConversionEngine {
             )
         }
 
-        // Try date string parsing
-        if let (date, _) = DateParser.parse(timeString) {
+        // Try date string parsing (strict: only accept if entire string is a date)
+        if let (date, _) = DateParser.parseStrict(timeString) {
             let secondsOutput = OutputFormatter.formatTimestamp(from: date, precision: .seconds)
             let millisOutput = OutputFormatter.formatTimestamp(from: date, precision: .milliseconds)
             let primaryOutput: String
@@ -102,7 +96,7 @@ enum ConversionEngine {
         if let (_, unit) = TimestampDetector.detect(input) {
             return .unixTimestamp(unit: unit)
         }
-        if let (_, format) = DateParser.parse(input) {
+        if let (_, format) = DateParser.parseStrict(input) {
             return .dateString(format: format)
         }
         return .unrecognized
@@ -128,7 +122,7 @@ enum ConversionEngine {
         for suffix in chineseSuffixes {
             if trimmed.hasSuffix(suffix) {
                 let candidate = String(trimmed.dropLast(suffix.count))
-                if TimestampDetector.detect(candidate) != nil || DateParser.parse(candidate) != nil {
+                if TimestampDetector.detect(candidate) != nil || DateParser.parseStrict(candidate) != nil {
                     return candidate
                 }
             }
@@ -136,7 +130,7 @@ enum ConversionEngine {
         for prefix in chinesePrefixes {
             if trimmed.hasPrefix(prefix) {
                 let candidate = String(trimmed.dropFirst(prefix.count))
-                if TimestampDetector.detect(candidate) != nil || DateParser.parse(candidate) != nil {
+                if TimestampDetector.detect(candidate) != nil || DateParser.parseStrict(candidate) != nil {
                     return candidate
                 }
             }
@@ -150,13 +144,13 @@ enum ConversionEngine {
             // Trim prefix characters one by one
             var str = trimmed
             while !str.isEmpty {
-                if DateParser.parse(str) != nil { return str }
+                if DateParser.parseStrict(str) != nil { return str }
                 str.removeFirst()
             }
             // Also try trimming suffix characters from the original
             str = trimmed
             while !str.isEmpty {
-                if DateParser.parse(str) != nil { return str }
+                if DateParser.parseStrict(str) != nil { return str }
                 str.removeLast()
             }
             // Try trimming both ends
@@ -164,14 +158,14 @@ enum ConversionEngine {
             var rightIdx = trimmed.endIndex
             while leftIdx < rightIdx {
                 let candidate = String(trimmed[leftIdx..<rightIdx])
-                if DateParser.parse(candidate) != nil { return candidate }
+                if DateParser.parseStrict(candidate) != nil { return candidate }
                 leftIdx = trimmed.index(after: leftIdx)
             }
             leftIdx = trimmed.startIndex
             rightIdx = trimmed.index(before: trimmed.endIndex)
             while leftIdx < rightIdx {
                 let candidate = String(trimmed[leftIdx..<rightIdx])
-                if DateParser.parse(candidate) != nil { return candidate }
+                if DateParser.parseStrict(candidate) != nil { return candidate }
                 rightIdx = trimmed.index(before: rightIdx)
             }
         }
@@ -204,7 +198,7 @@ enum ConversionEngine {
         let tokens = trimmed.split(whereSeparator: { $0.isWhitespace || $0.isPunctuation })
         for token in tokens {
             let str = String(token)
-            if TimestampDetector.detect(str) != nil || DateParser.parse(str) != nil {
+            if TimestampDetector.detect(str) != nil || DateParser.parseStrict(str) != nil {
                 return str
             }
         }
