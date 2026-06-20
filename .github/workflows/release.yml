@@ -1,0 +1,110 @@
+name: Release DMG
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Package DMG
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Show environment
+        run: |
+          sw_vers
+          xcodebuild -version
+          swift --version
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            echo "value=${TAG_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate Xcode project
+        run: python3 scripts/generate_xcodeproj.py
+
+      - name: Build app (Release)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project itime.xcodeproj \
+            -scheme itime \
+            -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            MARKETING_VERSION="${{ steps.version.outputs.value }}" \
+            CURRENT_PROJECT_VERSION="${{ steps.version.outputs.value }}" \
+            clean build
+
+      - name: Locate built .app
+        id: app
+        run: |
+          APP_PATH=$(find build/Build/Products/Release -maxdepth 2 -name 'itime.app' -print -quit)
+          if [ -z "$APP_PATH" ]; then
+            echo "itime.app not found"; exit 1
+          fi
+          echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Stage app as iTime.app
+        run: |
+          mkdir -p dist/staging
+          rm -rf "dist/staging/iTime.app"
+          cp -R "${{ steps.app.outputs.path }}" "dist/staging/iTime.app"
+
+      - name: Create DMG
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          DMG_NAME="iTime-${{ steps.version.outputs.value }}.dmg"
+          ln -sf /Applications dist/staging/Applications
+          hdiutil create \
+            -volname "iTime" \
+            -srcfolder dist/staging \
+            -fs HFS+ \
+            -format UDZO \
+            -ov \
+            "dist/${DMG_NAME}"
+          ls -lh dist/
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iTime-${{ steps.version.outputs.value }}-dmg
+          path: dist/iTime-${{ steps.version.outputs.value }}.dmg
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: iTime ${{ steps.version.outputs.value }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: dist/iTime-${{ steps.version.outputs.value }}.dmg
