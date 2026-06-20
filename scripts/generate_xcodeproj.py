@@ -8,6 +8,14 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(PROJECT_DIR, "itime")
 TEST_DIR = os.path.join(PROJECT_DIR, "itimeTests")
 
+# Read version from VERSION file (single source of truth)
+VERSION_FILE = os.path.join(PROJECT_DIR, "VERSION")
+try:
+    with open(VERSION_FILE, "r") as f:
+        APP_VERSION = f.read().strip()
+except FileNotFoundError:
+    APP_VERSION = "1.0.0"
+
 def make_id(name, salt=""):
     """Generate a deterministic 24-char hex ID from a name."""
     h = hashlib.md5(f"{name}{salt}".encode()).hexdigest().upper()
@@ -551,7 +559,7 @@ lines.append(f"""\t\t{app_debug_id} /* Debug */ = {{
 \t\t\t\t\t"$(inherited)",
 \t\t\t\t\t"@executable_path/../Frameworks",
 \t\t\t\t);
-\t\t\t\tMARKETING_VERSION = 1.0.0;
+\t\t\t\tMARKETING_VERSION = {APP_VERSION};
 \t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = com.itime.app;
 \t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";
 \t\t\t\tSWIFT_EMIT_LOC_STRINGS = NO;
@@ -578,7 +586,7 @@ lines.append(f"""\t\t{app_release_id} /* Release */ = {{
 \t\t\t\t\t"$(inherited)",
 \t\t\t\t\t"@executable_path/../Frameworks",
 \t\t\t\t);
-\t\t\t\tMARKETING_VERSION = 1.0.0;
+\t\t\t\tMARKETING_VERSION = {APP_VERSION};
 \t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = com.itime.app;
 \t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";
 \t\t\t\tSWIFT_EMIT_LOC_STRINGS = NO;

@@ -54,6 +54,60 @@ final class ToastService {
         toastWindow = window
 
         // Auto-dismiss after 2 seconds
+        scheduleDismiss(window)
+    }
+
+    /// Show a simple message toast (no input→output format, just the message text).
+    func showMessage(_ message: String) {
+        // Cancel any existing dismiss timer
+        dismissTask?.cancel()
+
+        // Remove existing toast
+        if let existing = toastWindow {
+            existing.orderOut(nil)
+        }
+
+        // Create new toast
+        let window = ToastWindow()
+        let toastView = ToastView(message: message)
+        let hostingView = NSHostingView(rootView: toastView)
+
+        // Measure the content
+        let fittingSize = hostingView.fittingSize
+        let width = max(280, min(400, fittingSize.width + 8))
+        let height = fittingSize.height + 4
+
+        window.setContentSize(NSSize(width: width, height: height))
+        window.contentView = hostingView
+
+        // Position: centered horizontally, near top of screen
+        guard let screen = NSScreen.main else { return }
+        let screenFrame = screen.visibleFrame
+        let x = screenFrame.midX - width / 2
+        let y = screenFrame.maxY - 70 - height
+        window.setFrameOrigin(NSPoint(x: x, y: y))
+
+        window.orderFront(nil)
+        window.alphaValue = 0
+
+        // Fade in
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.15
+            window.animator().alphaValue = 1.0
+        }
+
+        // Announce to VoiceOver
+        AccessibilityHelpers.announceToVoiceOver(message)
+
+        toastWindow = window
+
+        // Auto-dismiss after 2 seconds
+        scheduleDismiss(window)
+    }
+
+    // MARK: - Private
+
+    private func scheduleDismiss(_ window: ToastWindow) {
         dismissTask = Task { [weak self, weak window] in
             try? await Task.sleep(for: .seconds(2))
             guard !Task.isCancelled, let window else { return }

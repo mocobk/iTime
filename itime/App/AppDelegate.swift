@@ -23,7 +23,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSUpdateDynamicServices()
 
         // Initialize system integrations
-        ClipboardService.shared.startMonitoringIfNeeded()
         HotkeyService.shared.registerCurrentHotkey()
 
         // Register for termination to clean up
@@ -37,6 +36,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func applicationWillTerminate(_ notification: Notification) {
         HotkeyService.shared.unregister()
-        ClipboardService.shared.stopMonitoring()
     }
 }

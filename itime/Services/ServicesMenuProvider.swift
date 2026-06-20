@@ -17,7 +17,7 @@ final class ServicesMenuProvider: NSObject {
     ) {
         guard let text = pasteboard.string(forType: .string), !text.isEmpty else {
             DispatchQueue.main.async {
-                ToastService.shared.show(input: "—", output: "未选中任何文本")
+                ToastService.shared.showMessage("未识别到有效时间")
             }
             return
         }
@@ -31,10 +31,7 @@ final class ServicesMenuProvider: NSObject {
 
         DispatchQueue.main.async {
             if results.isEmpty {
-                ToastService.shared.show(
-                    input: text.count > 30 ? String(text.prefix(30)) + "..." : text,
-                    output: "未识别到有效时间"
-                )
+                ToastService.shared.showMessage("未识别到有效时间")
                 return
             }
 
@@ -60,6 +57,7 @@ final class ServicesMenuProvider: NSObject {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // First, try converting the entire text as one value
+        // (ConversionEngine now handles time extraction internally)
         if let result = ConversionEngine.convert(trimmed, outputPrecision: precision) {
             return [result]
         }

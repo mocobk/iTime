@@ -107,7 +107,52 @@ final class ConversionEngineTests: XCTestCase {
         XCTAssertNil(ConversionEngine.convert("hello world"))
         XCTAssertNil(ConversionEngine.convert(""))
         XCTAssertNil(ConversionEngine.convert("   "))
-        XCTAssertNil(ConversionEngine.convert("abc123def"))
+    }
+
+    // MARK: - Time Extraction (filtering non-time characters)
+
+    func testExtractsTimestampFromMixedInput() {
+        // "abc123def" → extracts "123" as seconds timestamp
+        let result = ConversionEngine.convert("abc123def")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "123")
+        XCTAssertEqual(result!.direction, .timestampToDate)
+    }
+
+    func testExtractsTimestampWithChineseSuffix() {
+        // "1704067200秒" → extracts "1704067200"
+        let result = ConversionEngine.convert("1704067200秒")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "1704067200")
+    }
+
+    func testExtractsTimestampWithChinesePrefix() {
+        // "时间戳1704067200" → extracts "1704067200"
+        let result = ConversionEngine.convert("时间戳1704067200")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "1704067200")
+    }
+
+    func testExtractsDateFromMixedInput() {
+        // "现在是2024年6月20日" → extracts "2024年6月20日"
+        let result = ConversionEngine.convert("现在是2024年6月20日")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "2024年6月20日")
+        XCTAssertEqual(result!.direction, .dateToTimestamp)
+    }
+
+    func testPureTimestampNotModified() {
+        // Pure timestamp should not be modified
+        let result = ConversionEngine.convert("1704067200")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "1704067200")
+    }
+
+    func testPureDateNotModified() {
+        // Pure date should not be modified
+        let result = ConversionEngine.convert("2024-06-20 08:26:24")
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result!.input, "2024-06-20 08:26:24")
     }
 
     func testSpecialCharacters() {

@@ -124,7 +124,7 @@ final class HotkeyService {
             ToastService.shared.show(input: result.input, output: result.output)
             ConversionHistory.shared.add(result)
         } else {
-            ToastService.shared.show(input: text, output: "未识别到有效时间")
+            ToastService.shared.showMessage("未识别到有效时间")
         }
     }
 

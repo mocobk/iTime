@@ -7,7 +7,6 @@ struct SettingsView: View {
     var onDismiss: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @AppStorage("outputMilliseconds") private var outputMilliseconds = false
-    @AppStorage("clipboardMonitorEnabled") private var clipboardMonitorEnabled = false
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @State private var isRecordingHotkey = false
     @State private var hotkeyDisplay: String = "⌥⌘T"
@@ -75,35 +74,32 @@ struct SettingsView: View {
                         .disabled(true)
                 }
 
-                // Clipboard section
-                Section("剪贴板") {
-                    Toggle("后台剪贴板监听", isOn: $clipboardMonitorEnabled)
-                        .onChange(of: clipboardMonitorEnabled) { _, newValue in
-                            if newValue {
-                                ClipboardService.shared.startMonitoring()
-                            } else {
-                                ClipboardService.shared.stopMonitoring()
-                            }
-                        }
-
-                    if clipboardMonitorEnabled {
-                        Text("检测到时间相关文本时自动弹出转换结果，不会自动覆盖剪贴板")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
                 // General section
                 Section("通用") {
                     Toggle("开机自启动", isOn: $launchAtLogin)
                         .onChange(of: launchAtLogin) { _, newValue in
                             toggleLaunchAtLogin(newValue)
                         }
+                }
 
+                // About section
+                Section("关于") {
                     HStack {
                         Text("版本")
                         Spacer()
-                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")
+                        Text(appVersion)
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("作者")
+                        Spacer()
+                        Text("mocobk")
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("邮箱")
+                        Spacer()
+                        Text("mailmzb@qq.com")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -152,6 +148,20 @@ struct SettingsView: View {
            let config = try? JSONDecoder().decode(HotkeyConfig.self, from: data) {
             hotkeyDisplay = config.convertHotkey.displayString
         }
+    }
+
+    /// Read version: prefer Bundle (runtime), fallback to VERSION file (dev time).
+    private var appVersion: String {
+        let bundleVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        if let bundleVersion, !bundleVersion.isEmpty, bundleVersion != "$(MARKETING_VERSION)" {
+            return bundleVersion
+        }
+        // Fallback: read VERSION file for dev-time or SPM builds
+        if let url = Bundle.main.url(forResource: "VERSION", withExtension: nil),
+           let content = try? String(contentsOf: url) {
+            return content.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return "1.0.0"
     }
 
     // MARK: - Launch at Login
