@@ -2,6 +2,7 @@ import SwiftUI
 import ServiceManagement
 import Carbon.HIToolbox
 
+@MainActor
 struct SettingsView: View {
     var onDismiss: (() -> Void)?
     @Environment(\.dismiss) private var dismiss

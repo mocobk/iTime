@@ -4,6 +4,7 @@ import AppKit
 enum AccessibilityHelpers {
 
     /// Announce a message to VoiceOver.
+    @MainActor
     static func announceToVoiceOver(_ message: String) {
         guard let app = NSApp else { return }
         NSAccessibility.post(

@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 
+@MainActor
 struct ResultDisplayView: View {
     let result: ConversionResult
     @State private var copiedField: String?

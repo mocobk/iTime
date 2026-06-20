@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 struct HistoryListView: View {
     @Environment(ConversionHistory.self) private var history
 
@@ -59,6 +60,7 @@ struct HistoryListView: View {
     }
 }
 
+@MainActor
 struct HistoryRowView: View {
     let entry: ConversionResult
     @State private var copied = false
